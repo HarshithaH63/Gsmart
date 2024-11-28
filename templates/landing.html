@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TG6</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/landing.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="your_script.js" defer></script>
+
+</head>
+
+<body>
+    <nav class="navbar" style="margin-bottom: 80px;">
+        <div class="left">
+            <a href='/landing'>
+                <img src="{{ url_for('static', filename='images/Genpact_horizontal_color_rgb.png') }}" class="logo"
+                    alt="Genpact Logo">
+            </a>
+        </div>
+    </nav>
+
+    <main class="scroll-wrapper">
+        <div class="scroll-container">
+            <div class="selection1">
+                <div class="module">
+                    <span>MODULE</span>
+                </div>
+                <div class="moduleSelect">
+
+                    <select id="dropdown2" aria-label="Module Selection">
+                        {% if unique_module %}
+                        {% for module in unique_module %}
+                        <option value="{{ module }}">{{ module }}</option>
+                        {% endfor %}
+                        {% else %}
+                        <option value="">No parts available</option>
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="selection2">
+                <div class="part"><span>PART KEYWORD</span></div>
+                <div class="partSelect">
+
+                    <select id="part" aria-label="Part Keyword Selection">
+                        <option value="" selected>Select</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="parameter1">
+                <div class="shop1"><span>SHOP</span></div>
+                <div class="ShopSelect">
+
+                    <select id="shop" aria-label="Shop Selection">
+                        <option value="" selected>Select</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="parameter2">
+                <div class="wspg1"><span>WORKSCOPE</span></div>
+                <div class="wspgSelect">
+
+                    <select id="wspg" aria-label="Workscope Selection">
+                        <option value="" selected>Select</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="parameter3">
+                <div class="tech1"><span>TECH INSERT</span></div>
+                <div class="techSelect">
+
+                    <select id="tech" aria-label="Tech Insert Selection">
+                    </select>
+                </div>
+            </div>
+
+            <div class="parameter4">
+                <div class="sv1"><span>SV</span></div>
+                <div class="svSelect">
+
+                    <select id="sv" aria-label="SV Selection">
+                    </select>
+                </div>
+            </div>
+
+            <div class="parameter5">
+                <div class="thrust1"><span>THRUST</span></div>
+                <div class="thrustSelect">
+
+                    <select id="thrust" aria-label="Thrust Selection">
+                    </select>
+                </div>
+            </div>
+
+            <div class="parameter6">
+                <div class="region1"><span>REGION</span></div>
+                <div class="regionSelect">
+
+                    <select id="region" aria-label="Region Selection">
+                    </select>
+                </div>
+            </div>
+
+            <div class="parameter7">
+                <div class="esn1"><span>ESN</span></div>
+                <div class="esnSelect">
+
+                    <select id="esn" aria-label="ESN Selection">
+                    </select>
+                </div>
+            </div>
+
+            <div class="parameter8">
+                <div class="source1"><span>SOURCE</span></div>
+                <div class="sourceSelect">
+
+                    <select id="source" aria-label="Source Selection">
+                    </select>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="chart-container">
+        <div class="scrap" id="scrap">
+            <div class="scrapheading-bar">YOY SCRAP %</div>
+        </div>
+        <div class="icr" id="icr">
+            <div class="icrheading-bar">YOY ICR %</div>
+        </div>
+        <div class="ecr" id="ecr">
+            <div class="ecrheading-bar">YOY ECR %</div>
+        </div>
+    </section>
+
+    <section class="chart-container1" id="stackedcolumn">
+        <div class="stackedheading-bar">SCRAP % BY CONTRACT TYPE</div>
+    </section>
+
+    <section class="chart-container2">
+        <div class="tableheading-bar">BVD vs CC vs PROD DATA</div>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>SOURCE</th>
+                    <th>WORK ORDER</th>
+                    <th>SCRAP RATE</th>
+                    <th>ICR RATE</th>
+                    <th>ECR RATE</th>
+                </tr>
+            </thead>
+            <tbody id="table1">
+            </tbody>
+        </table>
+    </section>
+
+    <section class="chart-container4" id="funnelchartCC">
+        <div class="CCheading-bar">CC CUSTOMER MIX</div>
+    </section>
+
+    <section class="chart-container5" id="funnelchartBVD">
+        <div class="BVDheading-bar">BVD CUSTOMER MIX</div>
+    </section>
+
+
+    <script>
+
+        window.onload = function () {
+            // Attach change event listeners to all relevant dropdowns
+            $('#dropdown2').on('change', filters);  
+            $('#dropdown2, #part, #shop, #wspg, #sv, #tech, #thrust, #region, #source, #esn').on('change', function () {
+                filters(); // Trigger the filters function on change
+            });
+        };
+
+        function filters() {
+            // Get the selected module from the first dropdown
+            var selectedModule = $('#dropdown2').val();
+            console.log('Selected Module:', selectedModule);
+
+            // Get selected values from all dropdowns
+            var selectedPart = $('#part').val() || '';
+            var selectedShop = $('#shop').val() || '';
+            var selectedWspg = $('#wspg').val() || '';
+            var selectedSv = $('#sv').val() || '';
+            var selectedTech = $('#tech').val() || '';
+            var selectedThrust = $('#thrust').val() || '';
+            var selectedRegion = $('#region').val() || '';
+            var selectedSource = $('#source').val() || '';
+            var selectedESN = $('#esn').val() || '';
+
+            // Make an AJAX POST request to update data based on selected filters
+            $.ajax({
+                type: "POST",
+                url: "/filters",
+                data: {
+                    module: selectedModule,
+                    part_keyword: selectedPart,
+                    shop: selectedShop,
+                    wspg: selectedWspg,
+                    SV: selectedSv,
+                    tech: selectedTech,
+                    thrust: selectedThrust,
+                    region: selectedRegion,
+                    source: selectedSource,
+                    esn: selectedESN
+                },
+                dataType: 'json',
+                success: function (response) {
+                    console.log("RESPONSE", response);
+
+                    // Check if response contains the expected filter data
+                    if (response.filters) {
+                        // Update dropdowns with response data
+                        updateDropdown('#part', response.filters.part, selectedPart);
+                        updateDropdown('#shop', response.filters.shop, selectedShop);
+                        updateDropdown('#wspg', response.filters.wspg, selectedWspg);
+                        updateDropdown('#sv', response.filters.sv, selectedSv);
+                        updateDropdown('#tech', response.filters.tech, selectedTech);
+                        updateDropdown('#thrust', response.filters.thrust, selectedThrust);
+                        updateDropdown('#region', response.filters.region, selectedRegion);
+                        updateDropdown('#source', response.filters.source, selectedSource);
+                        updateDropdown('#esn', response.filters.esn, selectedESN);
+
+                        // Update charts and tables based on new data
+                        createClusteredColumnChart1('scrap', response.scrap);
+                        createClusteredColumnChart2('icr', response.icr);
+                        createClusteredColumnChart3('ecr', response.ecr);
+
+                        var datasets = transformData(response.chart.Source, response.chart.Scrap, response.chart.Contract);
+                        var contracts = [...new Set(response.chart.Contract)];
+                        updateStackedColumnChart(stackedcolumn, contracts, datasets);
+
+                        createFunnelChart(response.funnel1, funnelchartCC, '#cca300');
+                        createFunnelChart(response.funnel2, funnelchartBVD, '#2952a3');
+
+                        populateTable(response.table);
+                    } else {
+                        console.error("Invalid response format: missing 'filters' data.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", status, error);
+                }
+            });
+        }
+
+        // Map CSS selectors to cache keys
+        var cacheKeyMapping = {
+            "#part": "part",
+            "#shop": "shop",
+            "#wspg": "wspg",
+            "#sv": "sv",
+            "#tech": "tech",
+            "#thrust": "thrust",
+            "#region": "region",
+            "#source": "source",
+            "#esn": "esn"
+        };
+
+        // Dropdown cache for caching dropdown values
+        var dropdownCache = {
+            part: [],
+            shop: [],
+            wspg: [],
+            sv: [],
+            tech: [],
+            thrust: [],
+            region: [],
+            source: [],
+            esn: []
+        };
+
+        function updateDropdown(selector, items, selectedValue) {
+            var dropdown = $(selector);
+            var cacheKey = cacheKeyMapping[selector]; // Use the mapped key from cacheKeyMapping
+
+            if (!cacheKey) {
+                console.error("Invalid selector or cache key mapping missing for:", selector);
+                return;
+            }
+
+            // Initialize cache if empty
+            if (!dropdownCache[cacheKey] || dropdownCache[cacheKey].length === 0) {
+                dropdownCache[cacheKey] = items; // Cache the full list of items
+            }
+
+            dropdown.empty(); // Clear existing options
+
+            dropdown.append('<option value="" selected>Select</option>'); // Add default option
+
+            var fullList = dropdownCache[cacheKey];
+
+            fullList.forEach(function (item) {
+                if (item) {
+                    dropdown.append(new Option(item, item)); 
+                }
+            });
+
+            
+            if (selectedValue) {
+                dropdown.val(selectedValue);
+            }
+        }
+
+
+        function createClusteredColumnChart1(divId, data) {
+            if (!data || !data.Event_year || !data.Source || !data.Scrap) {
+                console.error('Invalid data format');
+                return;
+            }
+
+            const years = [...new Set(data.Event_year)];
+            const sources = [...new Set(data.Source)];
+            const scrapData = {};
+
+            years.forEach(year => {
+                scrapData[year] = {};
+                sources.forEach(source => {
+                    scrapData[year][source] = 0;
+                });
+            });
+
+            data.Event_year.forEach((year, index) => {
+                scrapData[year][data.Source[index]] += data.Scrap[index];
+            });
+
+            const plotData = sources.map(source => {
+                return {
+                    x: years,
+                    y: years.map(year => {
+                        const totalScrap = scrapData[year][source];
+                        const count = data.Event_year.filter((y, idx) => y === year && data.Source[idx] === source).length;
+                        return count > 0 ? (totalScrap / count).toFixed(2) : 0;
+                    }),
+                    type: 'bar',
+                    name: source,
+                    marker: {
+                        color: getColorForSource(source),
+                        width: 8
+                    },
+                    hoverinfo: 'y+name'
+                };
+            });
+
+            const layout = {
+                barmode: 'group',
+                xaxis: {
+                    title: 'Event Year',
+                    tickmode: 'array',
+                    tickvals: years,
+                    ticktext: years,
+                    tickangle: -45,
+                    automargin: true,
+                    titlefont: {
+                        size: 8
+                    }
+                },
+                yaxis: {
+                    title: 'Scrap Rate',
+                    titlefont: {
+                        size: 8
+                    }
+                },
+                margin: {
+                    t: 30,
+                    b: 30,
+                    l: 30,
+                    r: 30
+                },
+                height: 170,
+                width: 320,
+                legend: {
+                    orientation: 'h',
+                    yanchor: 'bottom',
+                    y: 1.1,
+                    xanchor: 'center',
+                    x: 0.5,
+                    itemclick: 'toggleothers',
+                    itemspacing: 10,
+                    title: {
+                        text: 'SOURCE',
+                        font: {
+                            size: 8
+                        }
+                    },
+                    font: {
+                        size: 8
+                    }
+                },
+                font: {
+                    size: 8
+                },
+                bargap: 0.2
+            };
+
+            Plotly.newPlot(divId, plotData, layout);
+        }
+
+
+        function createClusteredColumnChart2(divId, data) {
+            // Ensure data format is valid
+            if (!data || !data.Event_year || !data.Source || !data.ICR) {
+                console.error('Invalid data format');
+                return;
+            }
+
+            // Extract unique years and sources
+            const years = [...new Set(data.Event_year)];
+            const sources = [...new Set(data.Source)];
+            const icrData = {};
+
+            // Initialize icrData structure
+            years.forEach(year => {
+                icrData[year] = {};
+                sources.forEach(source => {
+                    icrData[year][source] = 0;
+                });
+            });
+
+            // Populate icrData with values
+            data.Event_year.forEach((year, index) => {
+                icrData[year][data.Source[index]] += data.ICR[index];
+            });
+
+            // Prepare the data for Plotly
+            const plotData = sources.map(source => {
+                return {
+                    x: years,
+                    y: years.map(year => {
+                        const totalICR = icrData[year][source];
+                        const count = data.Event_year.filter((y, idx) => y === year && data.Source[idx] === source).length;
+                        return count > 0 ? (totalICR / count).toFixed(2) : 0; // Average ICR rate
+                    }),
+                    type: 'bar',
+                    name: source, // Use the source name as the legend entry
+                    marker: {
+                        color: getColorForSource(source) // Use a helper function for colors
+                    },
+                    hoverinfo: 'y+name' // Show value and source on hover
+                };
+            });
+
+            // Layout for the Plotly chart
+            const layout = {
+                barmode: 'group',
+                xaxis: {
+                    title: 'Event Year',
+                    tickmode: 'array',
+                    tickvals: years,
+                    ticktext: years,
+                    tickangle: -45, // Rotate ticks to avoid overlap
+                    automargin: true,
+                    titlefont: {
+                        size: 8 // Adjust x-axis title font size
+                    }
+                },
+                yaxis: {
+                    title: 'ICR Rate',
+                    titlefont: {
+                        size: 8 // Adjust y-axis title font size
+                    }
+                },
+                margin: {
+                    t: 30, // Top margin
+                    b: 30, // Bottom margin
+                    l: 30, // Left margin
+                    r: 30 // Right margin
+                },
+                height: 170, // Adjust height as necessary
+                width: 320, // Adjust width as necessary
+                legend: {
+                    orientation: 'h',
+                    yanchor: 'bottom',
+                    y: 1.1,
+                    xanchor: 'center',
+                    x: 0.5,
+                    itemclick: 'toggleothers',
+                    itemspacing: 4,
+                    title: {
+                        text: 'SOURCE', // Legend title
+                        font: {
+                            size: 8 // Adjust legend title font size
+                        }
+                    },
+                    font: {
+                        size: 8 // Adjust legend item font size
+                    }
+                },
+                font: {
+                    size: 8 // Global font size for the entire plot
+                }
+            };
+
+            // Plot the data
+            Plotly.newPlot(divId, plotData, layout);
+        }
+
+
+        function createClusteredColumnChart3(divId, data) {
+            if (!data || !data.Event_year || !data.Source || !data.ECR) {
+                console.error('Invalid data format');
+                return;
+            }
+
+            const years = [...new Set(data.Event_year)];
+            const sources = [...new Set(data.Source)];
+            const ecrData = {};
+
+            // Initialize ecrData structure
+            years.forEach(year => {
+                ecrData[year] = {};
+                sources.forEach(source => {
+                    ecrData[year][source] = 0;
+                });
+            });
+
+            // Populate ecrData with values
+            data.Event_year.forEach((year, index) => {
+                ecrData[year][data.Source[index]] += data.ECR[index];
+            });
+
+            // Prepare the data for Plotly
+            const plotData = sources.map(source => {
+                return {
+                    x: years,
+                    y: years.map(year => {
+                        const totalECR = ecrData[year][source];
+                        const count = data.Event_year.filter((y, idx) => y === year && data.Source[idx] === source).length;
+                        return count > 0 ? (totalECR / count).toFixed(2) : 0; // Average ECR rate
+                    }),
+                    type: 'bar',
+                    name: source, // Use the source name as the legend entry
+                    marker: {
+                        color: getColorForSource(source) // Use a helper function for colors
+                    },
+                    hoverinfo: 'y+name' // Show value and source on hover
+                };
+            });
+
+            // Layout for the Plotly chart
+            const layout = {
+                barmode: 'group',
+                xaxis: {
+                    title: 'Event Year',
+                    tickmode: 'array',
+                    tickvals: years,
+                    ticktext: years,
+                    tickangle: -45,
+                    automargin: true,
+                    titlefont: {
+                        size: 8 // Adjust x-axis title font size
+                    }
+                },
+                yaxis: {
+                    title: 'ECR Rate',
+                    titlefont: {
+                        size: 8 // Adjust y-axis title font size
+                    }
+                },
+                margin: {
+                    t: 30, // Top margin
+                    b: 30, // Bottom margin
+                    l: 30, // Left margin
+                    r: 30 // Right margin
+                },
+                height: 170, // Adjust height as necessary
+                width: 320, // Adjust width as necessary
+                legend: {
+                    orientation: 'h',
+                    yanchor: 'bottom',
+                    y: 1.1,
+                    xanchor: 'center',
+                    x: 0.5,
+                    itemclick: 'toggleothers',
+                    itemspacing: 4,
+                    title: {
+                        text: 'SOURCE', // Legend title
+                        font: {
+                            size: 8 // Adjust legend title font size
+                        }
+                    },
+                    font: {
+                        size: 8 // Adjust legend item font size
+                    }
+                },
+                font: {
+                    size: 8 // Global font size for the entire plot
+                }
+            };
+
+            // Plot the data
+            Plotly.newPlot(divId, plotData, layout);
+        }
+
+
+        // Helper function to get color based on source
+        function getColorForSource(source) {
+            const colorMap = {
+                'PROD': '#088F8F',
+                'BVD': '#2952a3',
+                'CC': '#cca300', // Add more sources as needed
+            };
+            return colorMap[source] || '#cccccc'; // Default color
+        }
+
+
+        function transformData(source, scrap, contract) {
+            const contracts = [...new Set(contract)]; // Unique contracts (CSA, T&M)
+            const sources = [...new Set(source)]; // Unique sources (CC, BVD)
+
+            const datasets = sources.map(src => {
+                return {
+                    label: src,
+                    data: contracts.map(contractType => {
+                        // Calculate total scrap for the given source and contract
+                        let totalScrap = 0;
+
+                        scrap.forEach((scrapValue, index) => {
+                            if (source[index] === src && contract[index] === contractType) {
+                                totalScrap += scrapValue;
+                            }
+                        });
+
+                        // Round off the sum to two decimal places
+                        return parseFloat(totalScrap.toFixed(2));
+                    })
+                };
+            });
+
+            return datasets;
+        }
+
+        function updateStackedColumnChart(elementId, contracts, datasets) {
+            console.log("Contracts:", contracts); // Debugging line
+            console.log("Datasets:", datasets); // Debugging line
+
+            const traces = datasets.map(dataset => ({
+                type: 'bar',
+                x: contracts,
+                y: dataset.data.map(value => value * 100), // Convert to percentage
+                name: dataset.label,
+                text: dataset.data.map(value => `${(value * 100).toFixed(2)}%`), // Add '%' suffix
+                textposition: 'inside',
+                textfont: {
+                    color: '#ffffff',
+                    size: 11,
+                    family: 'Calibri Light, sans-serif',
+                    weight: 'bold'
+                },
+                marker: {
+                    color: dataset.label === 'BVD' ? '#2952a3' : '#cca300' // Adjust colors if needed
+                },
+                width: 0.7
+            }));
+
+            const layout = {
+                width: 280,
+                height: 200,
+                barmode: 'stack',
+                xaxis: {
+                    title: 'Contract',
+                    tickangle: -45,
+                    titlefont: {
+                        color: '#000000',
+                        size: 8,
+                        family: 'Calibri Light, sans-serif',
+                        weight: 'bold'
+                    },
+                    tickfont: {
+                        color: '#000000',
+                        size: 8,
+                        family: 'Calibri Light, sans-serif',
+                        weight: 'bold'
+                    },
+                    zeroline: true,
+                    showline: true,
+                    zerolinecolor: 'rgba(0, 0, 0, 0.2)',
+                    zerolinewidth: 0.5,
+                    gridcolor: 'rgba(0, 0, 0, 0.2)'
+                },
+                yaxis: {
+                    title: {
+                        text: 'Scrap Rate (%)',
+                        font: {
+                            color: '#000000',
+                            size: 8,
+                            family: 'Calibri Light, sans-serif',
+                            weight: 'bold'
+                        },
+                        standoff: 13
+                    },
+                    tickfont: {
+                        color: '#000000',
+                        size: 8,
+                        family: 'Calibri Light, sans-serif',
+                        weight: 'bold'
+                    },
+                    tickformat: '.0%',
+                    zeroline: true,
+                    showline: true,
+                    zerolinecolor: 'rgba(0, 0, 0, 0.2)',
+                    zerolinewidth: 0.5,
+                    gridcolor: 'rgba(0, 0, 0, 0.2)'
+                },
+
+                legend: {
+                    orientation: 'h',
+                    x: 0.5,
+                    y: 1.05,
+                    xanchor: 'center',
+                    yanchor: 'bottom',
+                    font: {
+                        color: '#000000',
+                        size: 10,
+                        family: 'Calibri Light, sans-serif',
+                        weight: 'bold'
+                    },
+                    title: {
+                        text: 'Source', // Legend title
+                        font: {
+                            color: '#000000',
+                            size: 12,
+                            family: 'Calibri Light, sans-serif',
+                            weight: 'bold'
+                        }
+                    },
+                    itemclick: 'toggle', // Make items toggleable
+                    itemdistance: 5 // Adjust distance between items
+                },
+                margin: { l: 20, r: 20, t: 40, b: 20 }
+            };
+
+            Plotly.newPlot(elementId, traces, layout);
+        }
+
+
+
+
+        function createFunnelChart(data, elementId, color) {
+            // Count occurrences of SO for each operator
+            const operatorSOCount = data['Operator'].reduce((acc, operator) => {
+                acc[operator] = (acc[operator] || 0) + 1;
+                return acc;
+            }, {});
+
+            // Prepare data for the funnel chart
+            const chartData = [{
+                type: 'funnel',
+                y: Object.keys(operatorSOCount),
+                x: Object.values(operatorSOCount),
+                textinfo: "value+percent initial",
+                marker: {
+                    color: color // Use the passed color
+                },
+                hoverinfo: 'text',
+                text: Object.values(operatorSOCount).map((value, index) =>
+                    `${Object.keys(operatorSOCount)[index]}: ${value} (${((value / data.Operator.length) * 100).toFixed(1)}%)`
+                )
+            }];
+
+            const layout = {
+                funnelmode: "stack",
+                width: 500,
+                height: 270,
+                margin: { l: 40, r: 20, t: 30, b: 20 },
+                xaxis: {
+                    title: 'Count of SO',
+                    titlefont: {
+                        color: '#000000',
+                        size: 8, // Font size set to 8
+                        family: 'Calibri Light, sans-serif',
+                        weight: 'bold'
+                    },
+                    tickfont: {
+                        size: 8 // Font size for x-axis ticks set to 8
+                    },
+                    showgrid: true,
+                    zeroline: true,
+                    gridcolor: 'rgba(0, 0, 0, 0.1)',
+                },
+                yaxis: {
+                    title: 'Operator',
+                    titlefont: {
+                        color: '#000000',
+                        size: 8, // Font size set to 8
+                        family: 'Calibri Light, sans-serif',
+                        weight: 'bold'
+                    },
+                    tickfont: {
+                        size: 8 // Font size for y-axis ticks set to 8
+                    }
+                },
+                plot_bgcolor: 'rgba(255, 255, 255, 1)', // Set plot area to white
+                paper_bgcolor: 'rgba(255, 255, 255, 1)' // Set paper background to white
+            };
+
+            Plotly.newPlot(elementId, chartData, layout);
+        }
+
+
+
+        function createPieChart(data, elementId) {
+            const operatorSOCount = data['Operator'].reduce((acc, operator) => {
+                acc[operator] = (acc[operator] || 0) + 1;
+                return acc;
+            }, {});
+
+            const chartData = [{
+                type: 'pie',
+                labels: Object.keys(operatorSOCount),
+                values: Object.values(operatorSOCount),
+                marker: { colors: ["#3D9970", "#FF4136", "#FF851B", "#0074D9"] }
+            }];
+
+            const layout = {
+                title: 'Pie Chart of Operator and SO Count'
+            };
+
+            Plotly.newPlot(elementId, chartData, layout);
+        }
+
+
+        function populateTable(data) {
+            var tableBody = document.getElementById('table1');
+            tableBody.innerHTML = '';
+
+            for (var i = 0; i < data.Source.length; i++) {
+                var row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${data.Source[i]}</td>
+                <td>${data.Count_WO[i]}</td>
+                <td>${data.Avg_Scrap_Rate[i]}%</td>  <!-- Added percentage symbol -->
+                <td>${data.Avg_ICR_Rate[i]}%</td>    <!-- Added percentage symbol -->
+                <td>${data.Avg_ECR_Rate[i]}%</td>
+            `;
+                tableBody.appendChild(row);
+            }
+        }
+
+
+        var dropdown = document.getElementById('dropdown2');
+        if (dropdown) {
+            dropdown.addEventListener('change', filters);
+        }
+
+        var dropdowns = ['#part', '#shop', '#wspg', '#sv', '#tech', '#thrust', '#region', '#source', '#esn'];
+        dropdowns.forEach(function (selector) {
+            $(selector).on('change', function () {
+                filters();
+            });
+        });
+
+        filters();
+
+    </script>
+
+
+</body>
+
+</body>
+
+</html>

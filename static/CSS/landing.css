@@ -1,0 +1,361 @@
+* {
+    font-family: 'Calibri (Body)';
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow-y: scroll;
+    /* background-color: #01152b; */
+
+}
+
+::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: transparent;
+}
+
+
+.navbar {
+    background-color: #042a54;
+    height: 10vh;
+    width: 99%;
+    position: fixed;
+    padding-left: 5%;
+    padding-right: 5%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    top: 2px;
+    left: 5px;
+    z-index: 1000;
+    /* border: 2px solid white; */
+    /* border-radius: 10px; */
+}
+
+.logo {
+    position: relative;
+    width: 150px;
+    height: 65px;
+    bottom: -3px;
+    left: 0px;
+    /* mix-blend-mode: multiply; */
+}
+
+.navbar h1 {
+    position: relative;
+    left: -10px;
+    top: 40px;
+    transform: translate(-50%, -50%);
+    color: rgb(243, 244, 247);
+    font-size: 60px;
+    font-weight: bolder;
+
+}
+
+.scroll-wrapper {
+    display: flex;
+    align-items: center;
+    width: 99vw;
+    /* Full viewport width */
+    height: 110px;
+    /* Adjust as needed */
+    overflow: hidden;
+    /* Hide vertical overflow */
+    position: relative;
+    position: absolute;
+    top: 45px;
+    left: 5px;
+
+
+}
+
+.scroll-container {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    flex-grow: 1;
+
+
+
+}
+
+.selection1,
+.selection2,
+.parameter1,
+.parameter2,
+.parameter3,
+.parameter4,
+.parameter5,
+.parameter6,
+.parameter7,
+.parameter8 {
+    display: inline-block;
+    margin-right: 20px;
+    /* Space between dropdowns */
+    width: 150px;
+    height: 55px;
+    background: linear-gradient(135deg, #042a54, #5b7f9c);
+    border-radius: 8px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.module,
+.part,
+.shop1,
+.wspg1,
+.tech1,
+.sv1,
+.thrust1,
+.region1,
+.source1,
+.esn1 {
+    font-size: 11px;
+    color: white;
+    text-align: center;
+    padding-top: 10px;
+}
+
+.moduleSelect,
+.partSelect,
+.ShopSelect,
+.wspgSelect,
+.techSelect,
+.svSelect,
+.thrustSelect,
+.regionSelect,
+.esnSelect,
+.sourceSelect {
+    position: absolute;
+    top: 30px;
+    left: 23%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+select {
+    width: 55px;
+    height: 30px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.scroll-btn {
+
+    color: black;
+    border: none;
+    height: 30px;
+    /* Match the height of dropdowns */
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    position: absolute;
+    top: 30%;
+    z-index: 10;
+}
+
+.left {
+    left: 0;
+}
+
+.right {
+    right: 0;
+}
+
+.chart-container {
+    height: 1000;
+    position: absolute;
+    top: 130px;
+    right: 2px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Center boxes horizontally */
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: normal;
+    width: 30%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.scrap,
+.icr,
+.ecr {
+    height: 195px;
+    border-radius: 8px;
+    white-space: normal;
+    width: 100%;
+    /* Make boxes take full width of the container */
+    padding: 20px;
+    box-sizing: border-box;
+    border: 1px solid black;
+    margin-bottom: 10px;
+    /* Space between boxes */
+    position: relative;
+    /* Relative positioning for headings */
+}
+
+.scrapheading-bar,
+.icrheading-bar,
+.ecrheading-bar {
+    background-color: #042a54;
+    color: white;
+    font-size: 16px;
+    font-family: 'Calibri Light', sans-serif;
+    font-weight: bold;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    height: 30px;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+.chart-container1 {
+
+    height: 240px;
+    position: absolute;
+    top: 340px;
+    left: 15px;
+    border-radius: 8px;
+    white-space: normal;
+    width: 25%;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 1px solid black;
+
+}
+
+
+
+.chart-container2 {
+    height: 180px;
+    position: absolute;
+    top: 150px;
+    left: 15px;
+    border-radius: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: normal;
+    width: 25%;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 1px solid black;
+}
+
+#dataTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+
+}
+
+#dataTable th,
+#dataTable td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center;
+    font-size: 10px;
+}
+
+#dataTable th {
+    background-color: #042a54;
+    font-weight: bold;
+    color: white;
+    font-size: 10px;
+}
+
+#dataTable tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#dataTable tr:hover {
+    background-color: #e2e2e2;
+}
+
+
+.chart-container4 {
+    height: 290px;
+    position: absolute;
+    top: 150px;
+    left: 350px;
+    border-radius: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: normal;
+    width: 42%;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 1px solid black;
+
+
+}
+
+.CCheading-bar,
+.BVDheading-bar,
+.stackedheading-bar,
+.tableheading-bar {
+    background-color: #042a54;
+    color: white;
+    font-size: 16px;
+    font-family: 'Calibri Light', sans-serif;
+    font-weight: bold;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    height: 30px;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.chart-container5 {
+    height: 285px;
+    position: absolute;
+    top: 465px;
+    left: 350px;
+    border-radius: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: normal;
+    width: 42%;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 1px solid black;
+
+
+}
